@@ -12,6 +12,16 @@ spring:
           predicates:
             - Path=/users/**
 
+jwt:
+  secret: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+  expiration: 3600000
+
+logging:
+  level:
+    root: INFO
+    com.example.api_gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+
 management:
   endpoints:
     web:
