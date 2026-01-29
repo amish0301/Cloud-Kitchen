@@ -1,6 +1,5 @@
 package com.example.user_service.controller;
 
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.user_service.DTO.LoginRequest;
 import com.example.user_service.DTO.SignupRequest;
+import com.example.user_service.DTO.SignupResponse;
 import com.example.user_service.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -22,8 +22,8 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> signup(@Valid @RequestBody SignupRequest request) {
-        return ResponseEntity.ok(Map.of("message", authService.register(request)));
+    public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest request) {
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
