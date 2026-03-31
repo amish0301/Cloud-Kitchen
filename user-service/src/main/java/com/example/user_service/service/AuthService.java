@@ -57,8 +57,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest req) {
         try {
-            User user = userRepo.findByEmail(req.getEmail())
-                    .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+            User user = userRepo.findByEmail(req.getEmail()).orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
             // verify password
             if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
@@ -66,17 +65,15 @@ public class AuthService {
             }
 
             if (!user.isActive()) {
-                throw new InvalidArgumentException(
-                        "Account is deactivated",
-                        Map.of("email", "Account is deactivated"));
+                throw new InvalidArgumentException("Account is deactivated", Map.of("email", "Account is deactivated"));
             }
 
             String accessToken = jwtUtil.generateToken(req.getEmail(), user.getRole().name());
             String refreshToken = jwtUtil.generateRefreshToken(req.getEmail());
 
             // return
-            return AuthResponse.builder().email(user.getEmail()).name(user.getName()).role(user.getRole().name())
-                    .accessToken(accessToken).refreshToken(refreshToken).build();
+            return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole().name(), accessToken, refreshToken);
+
 
         } catch (Exception e) {
             throw new RuntimeException(e);
