@@ -1,6 +1,7 @@
 package com.example.user_service.service;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,13 +9,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.example.user_service.DTO.AuthResponse;
 import com.example.user_service.DTO.LoginRequest;
 import com.example.user_service.DTO.SignupRequest;
 import com.example.user_service.Errors.custom.InvalidArgumentException;
 import com.example.user_service.Utils.JwtUtil;
-import com.example.user_service.model.User;
+import com.example.user_service.entity.User;
 import com.example.user_service.repository.UserRepo;
 
 @Service
@@ -72,11 +74,15 @@ public class AuthService {
             String refreshToken = jwtUtil.generateRefreshToken(req.getEmail());
 
             // return
-            return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole().name(), accessToken, refreshToken);
-
+            return AuthResponse.builder().email(req.getEmail()).name(user.getName()).role(user.getRole()).accessToken(accessToken).refreshToken(refreshToken).build();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    public void logout(@RequestHeader("X-User-Id") UUID uId) {
+        User user = userRepo.findById(uId).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRefreshToken(null);
+        userRepo.save(user);
     }
 }

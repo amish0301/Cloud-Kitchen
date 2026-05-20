@@ -1,9 +1,12 @@
 package com.example.user_service.controller;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,4 +35,9 @@ public class AuthController {
         return new ResponseEntity<>(authService.login(request), HttpStatus.OK);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("X-User-Id") UUID uId) {
+        authService.logout(uId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

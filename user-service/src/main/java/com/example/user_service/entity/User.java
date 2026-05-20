@@ -1,16 +1,22 @@
 package com.example.user_service.entity;
 
-import com.example.user_service.constant.Role;
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+
+import com.example.user_service.Utils.Constant.Role;
 
 @Entity
+@NoArgsConstructor
+@Data
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
 
     @Column(nullable = false)
     private String name;
@@ -28,15 +34,15 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Column(nullable = false, name = "refresh_token")
+    private String refreshToken;
+
     @Column(nullable = false)
     private boolean isActive = true;
 
     // Optional: for profile
     private String profileImageUrl;
-
-    // Optional: location (for delivery use-case later)
     private String address;
-
     private String city;
 
     // Audit fields
