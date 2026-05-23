@@ -31,9 +31,9 @@ public class JwAuthenticationFilter implements GlobalFilter, Ordered {
     private static final Logger log = LoggerFactory.getLogger(JwAuthenticationFilter.class);
 
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/auth/signup",
-            "/auth/login",
-            "/auth/refresh",
+            "/api/auth/signup",
+            "/api/auth/login",
+            "/api/auth/refresh",
             "/actuator/health",
             "/actuator/info"
     );
@@ -59,7 +59,7 @@ public class JwAuthenticationFilter implements GlobalFilter, Ordered {
 
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange, "Missing or malformed Authorization header");
+            return unauthorized(exchange, "Missing Authorization header");
         }
 
         String token = authHeader.substring(7);
@@ -73,7 +73,7 @@ public class JwAuthenticationFilter implements GlobalFilter, Ordered {
             userId = jwtUtil.extractUserId(token);
             role = jwtUtil.extractUserRole(token);
         } catch (Exception e) {
-            return unauthorized(exchange, "Malformed token claims");
+            return unauthorized(exchange, "Your Token Expires ! relogin");
         }
 
         String requestId = request.getHeaders().getFirst("X-Request-Id");
