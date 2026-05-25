@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=
 server:
   port: 8000
 
@@ -30,7 +29,6 @@ spring:
           predicates:
             - Path=/api/users/**, /api/auth/**
           filters:
-            - StripPrefix=1
             - name: RequestRateLimiter
 
       # # service registry
@@ -63,6 +61,7 @@ logging:
 management:
   endpoints:
     web:
+      base-path: /actuator
       exposure:
         include: health,info,env,configprops
   endpoint:

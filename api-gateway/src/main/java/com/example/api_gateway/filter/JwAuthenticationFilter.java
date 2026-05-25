@@ -59,7 +59,7 @@ public class JwAuthenticationFilter implements GlobalFilter, Ordered {
 
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange, "Missing Authorization header");
+            return unauthorized(exchange, "Missing or malformed Authorization header");
         }
 
         String token = authHeader.substring(7);
@@ -73,7 +73,7 @@ public class JwAuthenticationFilter implements GlobalFilter, Ordered {
             userId = jwtUtil.extractUserId(token);
             role = jwtUtil.extractUserRole(token);
         } catch (Exception e) {
-            return unauthorized(exchange, "Your Token Expires ! relogin");
+            return unauthorized(exchange, "Malformed token claims");
         }
 
         String requestId = request.getHeaders().getFirst("X-Request-Id");
@@ -99,6 +99,7 @@ public class JwAuthenticationFilter implements GlobalFilter, Ordered {
     private boolean isPublic(String path) {
         for (String p : PUBLIC_PATHS) {
             if (matcher.match(p, path)) {
+                log.debug("Public Path matched");
                 return true;
             }
         }
