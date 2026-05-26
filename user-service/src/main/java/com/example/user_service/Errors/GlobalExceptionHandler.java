@@ -2,11 +2,10 @@ package com.example.user_service.Errors;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +23,11 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.user_service.Errors.custom.InvalidArgumentException;
 import com.example.user_service.Errors.custom.InvalidJwtTokenException;
+import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
-    // ── Custom exceptions ────────────────────────────────────────────
-
     @ExceptionHandler(InvalidJwtTokenException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidJwt(InvalidJwtTokenException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body("Unauthorized", ex.getMessage()));
@@ -44,8 +40,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    // ── Spring Security ──────────────────────────────────────────────
-
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body("Unauthorized", ex.getMessage()));
@@ -55,8 +49,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body("Forbidden", ex.getMessage()));
     }
-
-    // ── Common HTTP / request-shape problems ─────────────────────────
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<Map<String, Object>> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
@@ -76,11 +68,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleBeanValidation(MethodArgumentNotValidException ex) {
-        Map<String, String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
-                .collect(Collectors.toMap(
+        Map<String, List<String>> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.groupingBy(
                         fe -> fe.getField(),
-                        fe -> fe.getDefaultMessage() == null ? "invalid" : fe.getDefaultMessage(),
-                        (a, b) -> a));
+                        Collectors.mapping(
+                                fe -> fe.getDefaultMessage() == null ? "invalid" : fe.getDefaultMessage(),
+                                Collectors.toList())));
         Map<String, Object> response = body("Validation Failed", "Request body is invalid");
         response.put("fieldErrors", fieldErrors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
@@ -110,10 +103,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(body("Conflict", "The request conflicts with existing data"));
     }
-
-    // ── Catch-all (LAST RESORT) ──────────────────────────────────────
-    // Log the actual exception server-side, return a generic message to the client.
-    // NEVER expose ex.getMessage() here — it can leak internal details.
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleUnexpected(Exception ex) {
