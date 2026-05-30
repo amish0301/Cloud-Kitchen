@@ -1,5 +1,5 @@
 server:
-  port: 8000
+  port: ${SERVER_PORT:8000}
 
 spring:
   application:
@@ -12,8 +12,7 @@ spring:
         cors-configurations:
           '[/**]':
             allowedOriginPatterns:
-              - "http://localhost:3000"
-              - "http://192.168.1.*:*"
+              - ${FRONTEND_URL:http://localhost:3000}
             allowedMethods:
               - GET
               - POST
@@ -25,7 +24,7 @@ spring:
             maxAge: 3600
       routes:
         - id: user-service
-          uri: http://localhost:8001    # configure service discovery
+          uri: ${USER_SERVICE_URL:http://localhost:8001}    # configure service discovery
           predicates:
             - Path=/api/users/**, /api/auth/**
           filters:

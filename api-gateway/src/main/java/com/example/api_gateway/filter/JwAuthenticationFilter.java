@@ -54,6 +54,7 @@ public class JwAuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         if (isPublic(path)) {
+            log.info("Public Route called : {}", path);
             return chain.filter(exchange);
         }
 

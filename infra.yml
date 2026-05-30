@@ -1,4 +1,22 @@
 services:
+  # MySQL Database (used by user-service)
+  mysql:
+    image: mysql:8.0
+    container_name: cloud-kitchen-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: cloud_kitchen
+      MYSQL_ROOT_PASSWORD: root 
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Redis Instance
   redis:
     image: redis:7-alpine
@@ -14,6 +32,40 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+  
+  # API Gateway
+  api_gateway:
+    build: 
+      context: ./api-gateway
+      dockerfile: api-gateway.Dockerfile
+    container_name: api-gateway
+    restart: unless-stopped
+    env_file:
+      - ./api-gateway/api-gateway.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+
+
+  user-service:
+    build: 
+      context: ./user-service
+      dockerfile: user-service.Dockerfile
+    container_name: user-service
+    restart: unless-stopped
+    env_file:
+      - ./user-service/user-service.env
+    ports:
+      - "8001:8001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
 
 volumes:
   redis-data:
+  mysql-data:

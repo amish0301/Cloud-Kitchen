@@ -1,5 +1,5 @@
 server:
-  port: 8001
+  port: ${SERVER_PORT:8001}
 
 spring:
   application:
@@ -19,8 +19,6 @@ spring:
         use_sql_comments: true
     open-in-view: false        
 
-# ── JWT (used by JwtUtil + AuthService) ─────────────────────────────
-# Secret must be ≥ 32 bytes for HS256. Override with JWT_SECRET in production.
 jwt:
   secret: ${JWT_SECRET:abcdefgddas}
   access-token-expiration: 900000       
@@ -67,7 +65,7 @@ spring:
       on-profile: mysql
 
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:cloud_kitchen}?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:cloud_kitchen}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
