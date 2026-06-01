@@ -23,6 +23,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.user_service.Errors.custom.InvalidArgumentException;
 import com.example.user_service.Errors.custom.InvalidJwtTokenException;
+import com.example.user_service.Errors.custom.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
@@ -54,6 +55,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
         String msg = "Method " + ex.getMethod() + " not allowed. Supported: " + ex.getSupportedHttpMethods();
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(body("Method Not Allowed", msg));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body("Not Found", ex.getMessage()));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

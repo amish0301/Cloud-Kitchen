@@ -3,7 +3,10 @@ package com.example.user_service.repository;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.user_service.entity.User;
@@ -12,4 +15,6 @@ import com.example.user_service.entity.User;
 public interface UserRepo extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
+    @Query("SELECT u FROM User u WHERE u.isActive = true")
+    Page<User> getAllUsers(Pageable pageable);
 }
