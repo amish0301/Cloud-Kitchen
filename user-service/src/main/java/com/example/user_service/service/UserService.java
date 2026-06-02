@@ -43,6 +43,14 @@ public class UserService {
 
         return String.format("User info Updated Successfully = " + userId);
     }
+
+    // Delete user
+    public String deleteUser(String uId) {
+        User usr = userRepo.findById(UUID.fromString(uId)).orElseThrow(() -> new ResourceNotFoundException("User not found: " + uId));
+        usr.setActive(false);
+        userRepo.save(usr);
+        return String.format("User deleted Successfully");
+    }
     
     public PagedResponse<UserInfoDTO> getAllUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());

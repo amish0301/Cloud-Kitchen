@@ -6,6 +6,7 @@ import com.example.user_service.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,8 +29,13 @@ public class UserController {
     }
 
     @PatchMapping
-    public ResponseEntity<String> updateUser(@AuthenticationPrincipal String userId,UserInfoDTO userInfo) {
+    public ResponseEntity<String> updateUser(@AuthenticationPrincipal String userId, UserInfoDTO userInfo) {
         return ResponseEntity.ok().body(userService.updateUser(userId, userInfo));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteUser(@AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok().body(userService.deleteUser(userId));
     }
 
     // Pageable all users info. ?page=0&size=20
