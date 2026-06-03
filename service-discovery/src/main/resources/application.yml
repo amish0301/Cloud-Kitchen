@@ -1,0 +1,16 @@
+server:
+  port: ${SERVER_PORT:7998}
+
+spring:
+  application:
+    name: service-discovery
+
+eureka:
+  instance:
+    hostname: ${EUREKA_SERVER_HOST:localhost}
+  client:
+    # Eureka server should neither register with nor fetch from itself
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/

@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.user_service.DTO.AddressDTO;
 import com.example.user_service.DTO.PagedResponse;
@@ -31,17 +32,32 @@ public class UserService {
         return toUserInfoDTO(user);
     }
 
+    @Transactional
     public String updateUser(String userId, UserInfoDTO userInfo) {
         User user = userRepo.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
-        user.setName(userInfo.getName());
-        user.setEmail(userInfo.getEmail());
-        user.setPhone(userInfo.getPhone());
-        user.setAddress(userInfo.getAddress().getAddress());
-        user.setCity(userInfo.getAddress().getCity());
-        userRepo.save(user);
 
-        return String.format("User info Updated Successfully = " + userId);
+        if(userInfo.getEmail() != null) {
+            throw new IllegalArgumentException("Email cannot be updated");
+        }
+
+        if (userInfo.getName() != null) {
+            user.setName(userInfo.getName());
+        }
+        if (userInfo.getPhone() != null) {
+            user.setPhone(userInfo.getPhone());
+        }
+
+        AddressDTO address = userInfo.getAddress();
+        if (address != null) {
+            if (address.getAddress() != null) {
+                user.setAddress(address.getAddress());
+            }
+            if (address.getCity() != null) {
+                user.setCity(address.getCity());
+            }
+        }
+        return "User info updated successfully: " + userId;
     }
 
     // Delete user

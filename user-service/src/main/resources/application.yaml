@@ -24,6 +24,16 @@ jwt:
   access-token-expiration: 900000       
   refresh-token-expiration: 2592000000   
 
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:7998/eureka/}
+
+  instance:
+    prefer-ip-address: true
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

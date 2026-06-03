@@ -33,6 +33,18 @@ services:
       timeout: 3s
       retries: 5
   
+  # Service Discovery (Eureka Server)
+  eureka-server:
+    build:
+      context: ./service-discovery
+      dockerfile: service-discovery.Dockerfile
+    container_name: service_discovery
+    restart: unless-stopped
+    env_file:
+      - ./service-discovery/service-discovery.env
+    ports:
+      - "7998:7998"
+
   # API Gateway
   api_gateway:
     build: 
