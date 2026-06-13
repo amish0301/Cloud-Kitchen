@@ -3,7 +3,7 @@ services:
   mysql:
     image: mysql:8.0
     container_name: cloud-kitchen-mysql
-    restart: unless-stopped
+    restart: always
     environment:
       MYSQL_DATABASE: cloud_kitchen
       MYSQL_ROOT_PASSWORD: root 
@@ -21,7 +21,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: cloud-kitchen-redis
-    restart: unless-stopped
+    restart: always
     ports:
       - "7999:6379"
     volumes:
@@ -39,7 +39,7 @@ services:
       context: ./service-discovery
       dockerfile: service-discovery.Dockerfile
     container_name: service_discovery
-    restart: unless-stopped
+    restart: always
     env_file:
       - ./service-discovery/service-discovery.env
     ports:
@@ -51,7 +51,7 @@ services:
       context: ./api-gateway
       dockerfile: api-gateway.Dockerfile
     container_name: api-gateway
-    restart: unless-stopped
+    restart: always
     env_file:
       - ./api-gateway/api-gateway.env
     ports:
@@ -68,7 +68,7 @@ services:
       context: ./user-service
       dockerfile: user-service.Dockerfile
     container_name: user-service
-    restart: unless-stopped
+    restart: always
     env_file:
       - ./user-service/user-service.env
     ports:

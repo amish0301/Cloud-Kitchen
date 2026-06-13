@@ -28,6 +28,7 @@ eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
+    lease-renewal-interval-in-seconds: 10
     service-url:
       defaultZone: ${EUREKA_SERVER_URL:http://localhost:7998/eureka/}
 

@@ -23,15 +23,30 @@ spring:
             allowCredentials: true
             maxAge: 3600
       routes:
-        - id: user-service
+        # Unauthenticated endpoints (login/signup/refresh) — rate limited per client IP
+        - id: auth-service
           uri: ${USER_SERVICE_URL:lb://user-service}    # configure service discovery
           predicates:
-            - Path=/api/user/**, /api/auth/**
+            - Path=/api/auth/**
           filters:
             - name: RequestRateLimiter
               args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.replenishRate: ${AUTH_RATE_REPLENISH:5}
+                redis-rate-limiter.burstCapacity: ${AUTH_RATE_BURST:10}
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@ipKeyResolver}"
+
+        # Authenticated endpoints — rate limited per user (falls back to IP if the
+        # X-User-Id header is absent)
+        - id: user-service
+          uri: ${USER_SERVICE_URL:lb://user-service}    # configure service discovery
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: ${USER_RATE_REPLENISH:10}
+                redis-rate-limiter.burstCapacity: ${USER_RATE_BURST:20}
                 redis-rate-limiter.requestedTokens: 1
                 key-resolver: "#{@userOrIpKeyResolver}"
 
