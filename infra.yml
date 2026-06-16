@@ -77,6 +77,20 @@ services:
       mysql:
         condition: service_healthy
 
+  restaurant-service:
+    build:
+      context: ./restaurant-service
+      dockerfile: restaurant-service.Dockerfile
+    container_name: restaurant-service
+    restart: always
+    env_file:
+      - ./restaurant-service/restaurant-service.env
+    ports:
+      - "8003:8003"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
 
 volumes:
   redis-data:
