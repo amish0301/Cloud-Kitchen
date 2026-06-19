@@ -34,7 +34,7 @@ public class MenuItem {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id", nullable = false)
+    @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
     @NotBlank
@@ -47,7 +47,6 @@ public class MenuItem {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    // Free-form section within a restaurant's menu, e.g. "Starters", "Beverages".
     private String category;
 
     @Enumerated(EnumType.STRING)
@@ -58,7 +57,6 @@ public class MenuItem {
     @Column(nullable = false)
     private boolean isAvailable = true;
 
-    // ── Audit ──
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

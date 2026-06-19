@@ -65,7 +65,7 @@ public class Restaurant {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
         name = "restaurant_cuisines",
-        joinColumns = @JoinColumn(name = "id")
+        joinColumns = @JoinColumn(name = "restaurant_id")
     )
     @Enumerated(EnumType.STRING)
     @Column(name = "cuisine")
