@@ -1,6 +1,5 @@
 package com.example.restaurant_service.entity;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -10,7 +9,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -20,45 +18,31 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * A section of a restaurant's menu, e.g. "Starters", "Beverages".
+ * Restaurant 1—* MenuCategory. Owning side holds the FK; no inverse
+ * @OneToMany collection on Restaurant (categories are queried directly).
+ */
 @Entity
-@Table(name = "menu_items", indexes = {
-        @Index(name = "idx_menu_item_restaurant", columnList = "restaurant_id"),
-        @Index(name = "idx_menu_item_category", columnList = "category_id")
-})
+@Table(name = "menu_categories")
 @Data
 @NoArgsConstructor
-public class MenuItem {
+public class MenuCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
-    private MenuCategory category;
-
-    // Denormalized restaurant reference (raw UUID, not an association) for fast
-    // per-restaurant menu queries. Set from category.getRestaurant().getId().
-    @Column(name = "restaurant_id", nullable = false)
-    private UUID restaurantId;
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
 
     @NotBlank
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
-
-    @Column(nullable = false)
-    private boolean isVeg;
-
-    @Column(nullable = false)
-    private boolean isAvailable = true;
-
-    private String imageUrl;
+    // Controls ordering of sections in the menu UI (asc).
+    private Integer displayOrder;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
