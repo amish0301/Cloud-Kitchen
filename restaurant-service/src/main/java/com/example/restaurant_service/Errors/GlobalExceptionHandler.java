@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.example.restaurant_service.Errors.custom.ConflictException;
 import com.example.restaurant_service.Errors.custom.InvalidArgumentException;
 import com.example.restaurant_service.Errors.custom.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -96,6 +97,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(body("Bad Request", "Invalid value for '" + ex.getName() + "'"));
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body("Conflict", ex.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

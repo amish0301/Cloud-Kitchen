@@ -13,10 +13,10 @@ import com.example.restaurant_service.entity.MenuCategory;
 public interface MenuCategoryRepo extends JpaRepository<MenuCategory, UUID> {
 
     // All sections of a restaurant's menu, ordered for display. Traverses MenuCategory.restaurant.id.
-    List<MenuCategory> findByRestaurant_IdOrderByDisplayOrderAsc(UUID restaurantId);
+    List<MenuCategory> findByRestaurantIdOrderByDisplayOrderAsc(UUID restaurantId);
 
     // Single category scoped to its restaurant (authorization / integrity).
-    Optional<MenuCategory> findByIdAndRestaurant_Id(UUID id, UUID restaurantId);
+    Optional<MenuCategory> findByIdAndRestaurantId(UUID id, UUID restaurantId);
 
-    boolean existsByIdAndRestaurant_Id(UUID id, UUID restaurantId);
+    boolean existsByIdAndRestaurantId(UUID id, UUID restaurantId);
 }

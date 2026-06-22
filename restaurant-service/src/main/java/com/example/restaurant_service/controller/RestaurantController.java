@@ -2,12 +2,15 @@ package com.example.restaurant_service.controller;
 
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.restaurant_service.DTO.PagedResponse;
 import com.example.restaurant_service.DTO.RestaurantDTO;
 import com.example.restaurant_service.DTO.RestaurantResponse;
+import com.example.restaurant_service.DTO.RestaurantUpdateDTO;
 import com.example.restaurant_service.entity.Restaurant;
 import com.example.restaurant_service.service.RestaurantService;
 
@@ -27,6 +31,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/restaurant")
 public class RestaurantController {
 
+    @Autowired
     private final RestaurantService restaurantService;
 
     public RestaurantController(RestaurantService restaurantService) {
@@ -52,6 +57,18 @@ public class RestaurantController {
             @Valid @RequestBody RestaurantDTO dto) {
         Restaurant created = restaurantService.createRestro(dto, UUID.fromString(userId));
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
+    public ResponseEntity<Restaurant> updateRestaurant(
+            @AuthenticationPrincipal String userId,
+            Authentication auth,
+            @PathVariable(value = "id") UUID restroId,
+            @Valid @RequestBody RestaurantUpdateDTO dto) {
+
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        return ResponseEntity.ok(restaurantService.updateRestro(restroId, dto, UUID.fromString(userId), isAdmin));
     }
 
     @DeleteMapping("/{id}")

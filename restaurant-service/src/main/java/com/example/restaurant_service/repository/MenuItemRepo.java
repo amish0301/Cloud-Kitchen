@@ -27,4 +27,7 @@ public interface MenuItemRepo extends JpaRepository<MenuItem, UUID> {
     Optional<MenuItem> findByIdAndRestaurantId(UUID id, UUID restaurantId);
 
     long countByRestaurantId(UUID restaurantId);
+
+    // Number of items in a section — used to block deletion of non-empty categories.
+    long countByCategoryId(UUID categoryId);
 }
