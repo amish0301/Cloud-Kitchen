@@ -7,8 +7,11 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.example.restaurant_service.DTO.MenuItemRow;
 import com.example.restaurant_service.entity.MenuItem;
 
 @Repository
@@ -30,4 +33,24 @@ public interface MenuItemRepo extends JpaRepository<MenuItem, UUID> {
 
     // Number of items in a section — used to block deletion of non-empty categories.
     long countByCategoryId(UUID categoryId);
+
+    @Query(value = """
+            SELECT mi.category_id   AS categoryId,
+                   mc.name          AS categoryName,
+                   mi.id            AS itemId,
+                   mi.restaurant_id AS restaurantId,
+                   mi.name          AS name,
+                   mi.description   AS description,
+                   mi.price         AS price,
+                   mi.is_veg        AS isVeg,
+                   mi.is_available  AS isAvailable,
+                   mi.image_url     AS imageUrl,
+                   mi.created_at    AS createdAt,
+                   mi.updated_at    AS updatedAt
+            FROM menu_items mi
+            JOIN menu_categories mc ON mc.id = mi.category_id
+            WHERE mi.restaurant_id = :restaurantId
+            ORDER BY mc.display_order, mc.name, mi.name
+            """, nativeQuery = true)
+    List<MenuItemRow> findMenuRowsByRestaurant(@Param("restaurantId") UUID restaurantId);
 }
