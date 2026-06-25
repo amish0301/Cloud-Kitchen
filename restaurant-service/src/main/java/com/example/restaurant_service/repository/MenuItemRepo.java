@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.restaurant_service.DTO.MenuItemRow;
+import com.example.restaurant_service.DTO.MenuItem.MenuItemRow;
 import com.example.restaurant_service.entity.MenuItem;
 
 @Repository

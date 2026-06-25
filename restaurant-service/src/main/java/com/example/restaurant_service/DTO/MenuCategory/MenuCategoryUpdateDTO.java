@@ -1,6 +1,7 @@
-package com.example.restaurant_service.DTO;
+package com.example.restaurant_service.DTO.MenuCategory;
 
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -12,9 +13,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuCategoryRequest {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class MenuCategoryUpdateDTO {
 
-    @NotBlank(message = "Name is required")
     @Size(min = 2, max = 50, message = "Name must be 2-50 characters")
     private String name;
 

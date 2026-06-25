@@ -1,4 +1,4 @@
-package com.example.restaurant_service.DTO;
+package com.example.restaurant_service.DTO.MenuItem;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

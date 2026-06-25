@@ -1,4 +1,4 @@
-package com.example.restaurant_service.DTO;
+package com.example.restaurant_service.DTO.MenuItem;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,7 +33,6 @@ public class MenuItemResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    /** Must be called while the persistence context is open (lazy category id). */
     public static MenuItemResponse from(MenuItem m) {
         return MenuItemResponse.builder()
                 .id(m.getId())

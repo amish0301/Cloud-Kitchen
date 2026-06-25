@@ -9,26 +9,93 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.restaurant_service.DTO.MenuCategoryItemsResponse;
-import com.example.restaurant_service.DTO.MenuItemResponse;
-import com.example.restaurant_service.DTO.MenuItemRow;
+import com.example.restaurant_service.DTO.MenuCategory.MenuCategoryItemsResponse;
+import com.example.restaurant_service.DTO.MenuItem.MenuItemRequest;
+import com.example.restaurant_service.DTO.MenuItem.MenuItemResponse;
+import com.example.restaurant_service.DTO.MenuItem.MenuItemRow;
+import com.example.restaurant_service.DTO.MenuItem.MenuItemUpdateDTO;
+import com.example.restaurant_service.Errors.custom.ResourceNotFoundException;
+import com.example.restaurant_service.Utils.Helper;
+import com.example.restaurant_service.entity.MenuCategory;
+import com.example.restaurant_service.entity.MenuItem;
+import com.example.restaurant_service.repository.MenuCategoryRepo;
 import com.example.restaurant_service.repository.MenuItemRepo;
 
 @Service
 public class MenuItemService {
 
     private final MenuItemRepo itemRepo;
+    private final MenuCategoryRepo categoryRepo;
+    private final RestaurantOwnershipGuard ownershipGuard;
 
-    public MenuItemService(MenuItemRepo itemRepo) {
+    public MenuItemService(MenuItemRepo itemRepo,
+                           MenuCategoryRepo categoryRepo,
+                           RestaurantOwnershipGuard ownershipGuard) {
         this.itemRepo = itemRepo;
+        this.categoryRepo = categoryRepo;
+        this.ownershipGuard = ownershipGuard;
     }
 
-    /**
-     * Full menu grouped by category. The native query returns flat rows (one per
-     * item, each carrying its category); we group them by categoryId in memory.
-     * A LinkedHashMap preserves the query's ORDER BY (display order), so sections
-     * come out in the order the owner configured.
-     */
+    @Transactional
+    public MenuItemResponse create(UUID restaurantId, UUID categoryId, UUID userId, MenuItemRequest req) {
+        ownershipGuard.assertOwns(restaurantId, userId);
+
+        MenuCategory category = categoryRepo.findByIdAndRestaurantId(categoryId, restaurantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        MenuItem item = new MenuItem();
+        item.setCategory(category);
+        item.setRestaurantId(restaurantId);
+        item.setName(req.getName());
+        item.setDescription(req.getDescription());
+        item.setPrice(req.getPrice());
+        item.setVeg(req.isVeg());
+        item.setAvailable(req.getIsAvailable() == null || req.getIsAvailable());
+        item.setImageUrl(req.getImageUrl());
+
+        return MenuItemResponse.from(itemRepo.save(item));
+    }
+
+    @Transactional
+    public MenuItemResponse update(UUID restaurantId, UUID itemId, UUID userId, MenuItemUpdateDTO dto) {
+        ownershipGuard.assertOwns(restaurantId, userId);
+
+        MenuItem item = itemRepo.findByIdAndRestaurantId(itemId, restaurantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
+
+        Helper.applyIfPresent(dto.getName(), item::setName);
+        Helper.applyIfPresent(dto.getDescription(), item::setDescription);
+        Helper.applyIfPresent(dto.getPrice(), item::setPrice);
+        Helper.applyIfPresent(dto.getIsVeg(), item::setVeg);
+        Helper.applyIfPresent(dto.getImageUrl(), item::setImageUrl);
+
+        // Re-parent only when the category actually changes.
+        if (dto.getCategoryId() != null && !dto.getCategoryId().equals(item.getCategory().getId())) {
+            MenuCategory newCategory = categoryRepo.findByIdAndRestaurantId(dto.getCategoryId(), restaurantId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            item.setCategory(newCategory);
+        }
+
+        return MenuItemResponse.from(itemRepo.save(item));
+    }
+
+    public boolean updateMenuItemAvailability(UUID restaurantId, UUID itemId, UUID userId, boolean isAvailable) {
+        MenuItem item = itemRepo.findByIdAndRestaurantId(itemId, restaurantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
+        item.setAvailable(isAvailable);
+        itemRepo.save(item);
+        return true;
+    }
+
+    @Transactional
+    public String deleteMenuItem(UUID restaurantId, UUID categoryId, UUID itemId, UUID userId) {
+        ownershipGuard.assertOwns(restaurantId, userId);
+        MenuItem item = itemRepo.findByIdAndRestaurantId(itemId, restaurantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
+        itemRepo.delete(item);
+        return String.format("%s Menu Item Deleted", item.getName());
+    }
+
     @Transactional(readOnly = true)
     public List<MenuCategoryItemsResponse> getAllItemsWithCategory(UUID restroId) {
         Map<UUID, List<MenuItemRow>> rowsByCategory = itemRepo.findMenuRowsByRestaurant(restroId).stream()

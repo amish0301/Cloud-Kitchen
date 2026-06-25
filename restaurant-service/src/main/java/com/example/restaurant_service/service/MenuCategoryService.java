@@ -4,9 +4,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.restaurant_service.DTO.MenuCategoryRequest;
-import com.example.restaurant_service.DTO.MenuCategoryResponse;
-import com.example.restaurant_service.DTO.MenuCategoryUpdateDTO;
+import com.example.restaurant_service.DTO.MenuCategory.MenuCategoryRequest;
+import com.example.restaurant_service.DTO.MenuCategory.MenuCategoryResponse;
+import com.example.restaurant_service.DTO.MenuCategory.MenuCategoryUpdateDTO;
 import com.example.restaurant_service.Errors.custom.ConflictException;
 import com.example.restaurant_service.Errors.custom.ResourceNotFoundException;
 import com.example.restaurant_service.Utils.Helper;

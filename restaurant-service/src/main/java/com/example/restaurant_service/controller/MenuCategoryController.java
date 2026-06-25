@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.restaurant_service.DTO.MenuCategoryRequest;
-import com.example.restaurant_service.DTO.MenuCategoryResponse;
-import com.example.restaurant_service.DTO.MenuCategoryUpdateDTO;
+import com.example.restaurant_service.DTO.MenuCategory.MenuCategoryRequest;
+import com.example.restaurant_service.DTO.MenuCategory.MenuCategoryResponse;
+import com.example.restaurant_service.DTO.MenuCategory.MenuCategoryUpdateDTO;
 import com.example.restaurant_service.service.MenuCategoryService;
 
 import jakarta.validation.Valid;

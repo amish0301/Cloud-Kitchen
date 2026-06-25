@@ -1,4 +1,4 @@
-package com.example.restaurant_service.DTO;
+package com.example.restaurant_service.DTO.MenuCategory;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
