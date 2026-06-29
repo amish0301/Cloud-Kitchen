@@ -3,7 +3,7 @@ package com.example.restaurant_service.service;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,26 +13,62 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.restaurant_service.DTO.PagedResponse;
 import com.example.restaurant_service.DTO.RestaurantDTO;
+import com.example.restaurant_service.DTO.RestaurantDetailResponse;
 import com.example.restaurant_service.DTO.RestaurantResponse;
 import com.example.restaurant_service.DTO.RestaurantUpdateDTO;
 import com.example.restaurant_service.Errors.custom.ResourceNotFoundException;
 import com.example.restaurant_service.Utils.Helper;
+import com.example.restaurant_service.client.UserServiceClient;
+import com.example.restaurant_service.client.dto.UserSummary;
 import com.example.restaurant_service.entity.Restaurant;
 import com.example.restaurant_service.repository.RestaurantRepo;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class RestaurantService {
 
     private final RestaurantRepo restroRepo;
+    private final UserServiceClient userServiceClient;
 
-    @Autowired
-    public RestaurantService(RestaurantRepo restroRepo) {
+    @Value("${internal.api.secret}")
+    private String internalApiSecret;
+
+    public RestaurantService(RestaurantRepo restroRepo, UserServiceClient userServiceClient) {
         this.restroRepo = restroRepo;
+        this.userServiceClient = userServiceClient;
     }
 
-    public Restaurant getRestroById(UUID id) {
-        return restroRepo.findById(id)
+    /**
+     * Fetch a restaurant and enrich it with the owner's public contact info,
+     * resolved from user-service over HTTP (via Eureka). The lookup degrades
+     * gracefully: if user-service is unreachable, the restaurant is still
+     * returned with a null owner rather than failing the whole request.
+     */
+    @Transactional(readOnly = true)
+    public RestaurantDetailResponse getRestroById(UUID id) {
+        Restaurant restaurant = restroRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant Not found"));
+
+        return RestaurantDetailResponse.from(restaurant, fetchOwner(restaurant.getOwnerId()));
+    }
+
+    private RestaurantDetailResponse.OwnerInfo fetchOwner(UUID ownerId) {
+        if (ownerId == null) {
+            return null;
+        }
+        try {
+            UserSummary owner = userServiceClient.findById(ownerId, internalApiSecret);
+            return RestaurantDetailResponse.OwnerInfo.builder()
+                    .id(owner.getId())
+                    .name(owner.getName())
+                    .phone(owner.getPhone())
+                    .build();
+        } catch (Exception ex) {
+            log.warn("Could not resolve owner {} from user-service: {}", ownerId, ex.getMessage());
+            return null;
+        }
     }
 
     public PagedResponse<RestaurantResponse> getRestaurants(int page, int size) {

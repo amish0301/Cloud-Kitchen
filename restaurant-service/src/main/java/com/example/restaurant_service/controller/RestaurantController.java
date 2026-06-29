@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.restaurant_service.DTO.PagedResponse;
 import com.example.restaurant_service.DTO.RestaurantDTO;
+import com.example.restaurant_service.DTO.RestaurantDetailResponse;
 import com.example.restaurant_service.DTO.RestaurantResponse;
 import com.example.restaurant_service.DTO.RestaurantUpdateDTO;
 import com.example.restaurant_service.entity.Restaurant;
@@ -39,7 +40,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Restaurant> getRestroById(@PathVariable UUID id) {
+    public ResponseEntity<RestaurantDetailResponse> getRestroById(@PathVariable UUID id) {
         return ResponseEntity.ok(restaurantService.getRestroById(id));
     }
 

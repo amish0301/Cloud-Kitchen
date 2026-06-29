@@ -21,8 +21,14 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET:abcdefgddas}
-  access-token-expiration: 900000       
-  refresh-token-expiration: 2592000000   
+  access-token-expiration: 900000
+  refresh-token-expiration: 2592000000
+
+# Shared secret for internal service-to-service calls (/internal/**).
+# Must match the value configured in callers (e.g. restaurant-service).
+internal:
+  api:
+    secret: ${INTERNAL_API_SECRET:super-secret-internal-key}
 
 eureka:
   client:

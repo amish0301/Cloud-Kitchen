@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.user_service.DTO.AddressDTO;
 import com.example.user_service.DTO.PagedResponse;
 import com.example.user_service.DTO.UserInfoDTO;
+import com.example.user_service.DTO.UserSummaryDTO;
 import com.example.user_service.Errors.custom.ResourceNotFoundException;
 import com.example.user_service.entity.User;
 import com.example.user_service.repository.UserRepo;
@@ -30,6 +31,19 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + uId));
 
         return toUserInfoDTO(user);
+    }
+
+    // Internal service-to-service lookup (used by other services via Feign).
+    public UserSummaryDTO getUserSummary(UUID id) {
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+
+        return UserSummaryDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .build();
     }
 
     @Transactional

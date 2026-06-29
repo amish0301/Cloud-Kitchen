@@ -24,6 +24,12 @@ jwt:
   access-token-expiration: 900000
   refresh-token-expiration: 2592000000
 
+# Shared secret sent on internal service-to-service calls (X-Internal-Secret).
+# Must match user-service's internal.api.secret.
+internal:
+  api:
+    secret: ${INTERNAL_API_SECRET:super-secret-internal-key}
+
 eureka:
   client:
     register-with-eureka: true

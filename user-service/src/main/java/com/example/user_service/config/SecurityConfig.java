@@ -1,6 +1,7 @@
 package com.example.user_service.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.user_service.auth.GatewayHeaderAuthFilter;
+import com.example.user_service.auth.InternalSecretFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +25,9 @@ public class SecurityConfig {
 
     @Autowired
     private GatewayHeaderAuthFilter gatewayHeaderAuthFilter;
+
+    @Value("${internal.api.secret}")
+    private String internalApiSecret;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,6 +45,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                // Guard /internal/** with the shared secret before the gateway-header filter runs.
+                .addFilterBefore(new InternalSecretFilter(internalApiSecret), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(gatewayHeaderAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
