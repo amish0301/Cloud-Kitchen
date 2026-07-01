@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.restaurant_service.DTO.MenuCategory.MenuCategoryItemsResponse;
+import com.example.restaurant_service.DTO.MenuItem.InternalItemResponse;
 import com.example.restaurant_service.DTO.MenuItem.MenuItemRequest;
 import com.example.restaurant_service.DTO.MenuItem.MenuItemResponse;
 import com.example.restaurant_service.DTO.MenuItem.MenuItemRow;
@@ -94,6 +95,12 @@ public class MenuItemService {
                 .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
         itemRepo.delete(item);
         return String.format("%s Menu Item Deleted", item.getName());
+    }
+
+    @Transactional(readOnly = true)
+    public InternalItemResponse getItemForCheckout(UUID restaurantId, UUID itemId) {
+        return itemRepo.findCheckoutView(restaurantId, itemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
     }
 
     @Transactional(readOnly = true)

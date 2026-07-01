@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.example.restaurant_service.DTO.MenuItem.InternalItemResponse;
 import com.example.restaurant_service.DTO.MenuItem.MenuItemRow;
 import com.example.restaurant_service.entity.MenuItem;
 
@@ -28,6 +29,20 @@ public interface MenuItemRepo extends JpaRepository<MenuItem, UUID> {
 
     // Fetch one item but scoped to its restaurant (authorization / integrity).
     Optional<MenuItem> findByIdAndRestaurantId(UUID id, UUID restaurantId);
+
+    // Internal checkout view: item (scoped to its restaurant) + the restaurant's open
+    // status, resolved in ONE joined query so order-service needs no follow-up call.
+    // MenuItem holds only a raw restaurantId, so this is a theta-join to Restaurant.
+    @Query("""
+            SELECT new com.example.restaurant_service.DTO.MenuItem.InternalItemResponse(
+                       mi.id, mi.restaurantId, mi.name, mi.price, mi.isAvailable, r.isOpen)
+            FROM MenuItem mi, Restaurant r
+            WHERE mi.id = :itemId
+              AND mi.restaurantId = :restaurantId
+              AND r.id = mi.restaurantId
+            """)
+    Optional<InternalItemResponse> findCheckoutView(@Param("restaurantId") UUID restaurantId,
+                                                    @Param("itemId") UUID itemId);
 
     long countByRestaurantId(UUID restaurantId);
 
